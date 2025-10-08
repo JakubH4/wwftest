@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gorilla — A WWF Inspired Story</title>
+  <meta name="description" content="An immersive scrolling page about gorillas, their social structures, and our relationship with them." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    /*
+      - Header and Footer removed.
+      - Hero background updated to a gorilla video.
+      - Replaced CSS scroll-snapping with a smoother JavaScript implementation.
+    */
+    :root {
+      --accent: #6127ff; /* Vibrant Purple */
+      --muted: #6b7280;
+      --bg: #ffffff;
+      --card-bg: #f7f7f7;
+      --text-light: #12102b; /* Primary Dark Purple */
+      --text-dark: #374151;
+      --maxw: 1280px;
+      --radius: 16px;
+      font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;}
+    
+    body{
+      margin:0; 
+      background-color: var(--bg);
+      color: var(--text-dark); 
+      -webkit-font-smoothing:antialiased; 
+      -moz-osx-font-smoothing:grayscale; 
+      line-height:1.7;
+      overflow: hidden; /* Changed to hidden to let JS control scroll */
+      position: relative;
+    }
+    a{color:var(--accent); text-decoration:none; transition: opacity 0.2s ease;}
+    a:hover { opacity: 0.8; }
+    .wrap{width:100%; max-width:var(--maxw); margin:0 auto; padding: 80px 32px; position: relative; z-index: 2;}
+    h1, h2, h3, h4 { color: var(--text-light); font-weight: 800; line-height: 1.2; }
+    p { color: var(--muted); }
+
+    .full-height-section {
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Main container for scrollable sections */
+    #main-container {
+        height: 100vh;
+        overflow-y: scroll;
+        scroll-snap-type: y mandatory;
+    }
+
+    /* HERO */
+    .hero{
+      overflow:hidden;
+      background-color: #12102b;
+      scroll-snap-align: start;
+    }
+    .hero video, .hero .hero-bg-img {
+      position:absolute; inset:0; width:100%; height:100%; object-fit:cover
+    }
+    .hero::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(18, 16, 43, 0.2) 0%, rgba(18, 16, 43, 0.9) 90%)}
+    .hero-inner{position:relative; z-index:2; text-align:center; max-width:980px; padding:48px 24px;}
+    .hero-inner .eyebrow, .hero-inner h1, .hero-inner p.lead {
+        color: #ffffff;
+    }
+    .eyebrow{font-size:16px; text-transform:uppercase; letter-spacing:2px; font-weight: 700;}
+    h1{font-size: clamp(2.8rem, 5vw, 4.5rem); margin:16px 0 24px;}
+    p.lead{margin:0 auto 28px; max-width:80%; font-size: 1.2rem; font-weight: 500;}
+    
+    .cta{
+      display:inline-block; 
+      padding:16px 32px; 
+      background:var(--accent); 
+      color:white; 
+      border-radius: 12px; 
+      font-weight:700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 14px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 20px rgba(97, 39, 255, 0.3);
+    }
+    .cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(97, 39, 255, 0.4);
+      opacity: 1;
+    }
+
+    .section-title {
+        text-align: center;
+        max-width: 700px;
+        margin: 0 auto 64px auto;
+    }
+    .section-title h2 {
+        font-size: clamp(2.2rem, 4vw, 3.2rem);
+        margin-bottom: 16px;
+    }
+
+    .story-section {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 48px;
+        align-items: center;
+        width: 100%;
+    }
+    @media (min-width: 768px) {
+      .story-section {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 64px;
+      }
+      .story-section.reverse .content { order: 2; }
+      .story-section.reverse .visual { order: 1; }
+    }
+    .story-section .visual img {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        border-radius: var(--radius);
+    }
+    .story-section .content h3 {
+        font-size: 2.2rem;
+        margin-bottom: 12px;
+    }
+    .story-section .content p, .story-section .content ul {
+        color: var(--muted);
+        max-width: 500px;
+    }
+    .story-section .content ul {
+      margin-top: 24px;
+      padding-left: 20px;
+      list-style-type: disc;
+    }
+    .story-section .content ul li {
+      margin-bottom: 10px;
+    }
+
+    .team{display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:24px; margin-bottom:28px}
+    .team .person{background:var(--card-bg); padding:16px; border-radius:var(--radius); text-align:center; transition: transform 0.3s ease;}
+    .person:hover { transform: translateY(-5px); }
+    .person img {width:100%; height:240px; object-fit:cover; border-radius:10px}
+    .person h4{margin:16px 0 4px; font-size: 1.2rem;}
+    .person p{margin:0; color:var(--muted); font-size:14px}
+
+    .apply-section {
+      text-align: center;
+      background: var(--card-bg);
+      padding: 64px 32px;
+      border-radius: var(--radius);
+      width: 100%;
+    }
+    .apply-section h3 {
+        font-size: 2.5rem;
+        margin: 0 0 16px;
+    }
+    .apply-section p {
+        max-width: 600px;
+        margin: 0 auto 32px auto;
+    }
+
+    @media (max-width:768px){
+      .wrap{padding: 48px 20px;}
+      p.lead{max-width:100%}
+    }
+  </style>
+</head>
+<body>
+  
+  <main>
+    <section class="hero full-height-section" aria-label="Hero: Gorilla">
+       <!-- [CHANGE] Updated video and poster -->
+      <video autoplay muted loop playsinline poster="https://images.pexels.com/photos/32181432/pexels-photo-32181432.jpeg" class="hero-bg-img">
+        <source src="https://www.pexels.com/download/video/8502274/" type="video/mp4">
+      </video>
+      <div class="hero-inner">
+        <div class="eyebrow">Nature • Community • Strength</div>
+        <h1>Strong alone. Unstoppable together.</h1>
+        <p class="lead">Discover the power of a truly united troop, built on a foundation of calculated strength and natural instinct.</p>
+        <a class="cta" href="#careers">Join the troop</a>
+      </div>
+    </section>
+
+    <section class="full-height-section" aria-labelledby="meet-gorillas">
+      <div class="wrap">
+        <div class="section-title">
+          <h2 id="meet-gorillas">Engineered by Nature</h2>
+          <p>We analyze the mechanics of greatness. Strength, social bonds, and intelligence are not left to chance. They are core components of a winning system.</p>
+        </div>
+        <div class="story-section">
+          <div class="visual">
+            <img src="https://images.pexels.com/photos/2657973/pexels-photo-2657973.jpeg" alt="Lush forest canopy">
+          </div>
+          <div class="content">
+            <h3>Genetic Kin</h3>
+            <p>Engineered for power. Our shared ancestry reveals a blueprint for dominance and resilience. We study the code to master the game.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="full-height-section">
+      <div class="wrap">
+        <div class="story-section reverse">
+          <div class="visual">
+            <img src="https://images.pexels.com/photos/1851537/pexels-photo-1851537.jpeg" alt="White tiger resting">
+          </div>
+          <div class="content">
+            <h3>Social Structure</h3>
+            <p>The math behind the troop. Every member plays a critical role in a complex system designed for survival and growth. This is a proven winning formula.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="full-height-section" aria-label="Analogy">
+      <div class="wrap">
+        <div class="story-section">
+          <div class="visual">
+              <img src="https://images.pexels.com/photos/1238272/pexels-photo-1238272.jpeg" alt="Two puppies playing">
+          </div>
+          <div class="content">
+            <h3>How We Relate</h3>
+            <p>Beyond instinct lies strategy. We transform raw power into calculated success, creating a rewarding experience for our partners and ourselves.</p>
+            <ul>
+              <li>Cross-functional collaboration</li>
+              <li>Open communication channels</li>
+              <li>Shared ownership of outcomes</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="full-height-section" aria-labelledby="our-team">
+      <div class="wrap">
+        <div class="section-title">
+            <h2 id="our-team">Meet our Troop</h2>
+            <p>Our experts are masters of their domain. Driven, ambitious, and ready to win, they form the core of our strength.</p>
+        </div>
+        <div class="team">
+          <div class="person">
+            <img src="https://images.pexels.com/photos/6272186/pexels-photo-6272186.jpeg" alt="Team member">
+            <h4>Jakub P.</h4>
+            <p>Lead Designer</p>
+          </div>
+          <div class="person">
+            <img src="https://images.pexels.com/photos/32181429/pexels-photo-32181429.jpeg" alt="Team member">
+            <h4>Jakub J.</h4>
+            <p>Senior Developer</p>
+          </div>
+          <div class="person">
+            <img src="https://images.pexels.com/photos/32181444/pexels-photo-32181444.jpeg" alt="Portrait of a woman">
+            <h4>Andrzej P.</h4>
+            <p>Producer</p>
+          </div>
+          <div class="person">
+            <img src="https://images.pexels.com/photos/29497849/pexels-photo-29497849.jpeg" alt="Team member">
+            <h4>Grzegorz K.</h4>
+            <p>QA Lead</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="careers" class="full-height-section">
+      <div class="wrap">
+        <div class="apply-section">
+            <h3>Join the troop — Gain with Wazdan</h3>
+            <p>Ready to gain? We're looking for serious players to join our troop. This is where ambition finds its reward and success is engineered.</p>
+            <a class="cta" href="https://wazdan.com/careers">See open roles</a>
+            <p style="color:var(--muted); margin-top:24px; font-size:14px">Prefer to send a CV? <a href="mailto:hr@wazdan.com">hr@wazdan.com</a></p>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sections = document.querySelectorAll('.full-height-section');
+        let currentSectionIndex = 0;
+        let isScrolling = false;
+        const scrollThreshold = 1000; // ms
+
+        function scrollToSection(index) {
+            if (index >= 0 && index < sections.length) {
+                const targetSection = sections[index];
+                targetSection.scrollIntoView({ behavior: 'smooth' });
+                currentSectionIndex = index;
+            }
+        }
+
+        window.addEventListener('wheel', (e) => {
+            if (isScrolling) return;
+
+            isScrolling = true;
+
+            const scrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+            if (scrollDirection === 'down') {
+                if (currentSectionIndex < sections.length - 1) {
+                    scrollToSection(currentSectionIndex + 1);
+                }
+            } else {
+                if (currentSectionIndex > 0) {
+                    scrollToSection(currentSectionIndex - 1);
+                }
+            }
+            
+            setTimeout(() => {
+                isScrolling = false;
+            }, scrollThreshold);
+
+        }, { passive: false });
+
+         // Add touch support for mobile devices
+        let touchStartY = 0;
+
+        window.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (isScrolling) return;
+
+            const touchEndY = e.touches[0].clientY;
+            const deltaY = touchStartY - touchEndY;
+
+            if (Math.abs(deltaY) > 50) { // Threshold to prevent accidental swipes
+                isScrolling = true;
+
+                if (deltaY > 0) { // Swiping up
+                    if (currentSectionIndex < sections.length - 1) {
+                        scrollToSection(currentSectionIndex + 1);
+                    }
+                } else { // Swiping down
+                    if (currentSectionIndex > 0) {
+                        scrollToSection(currentSectionIndex - 1);
+                    }
+                }
+                
+                setTimeout(() => {
+                    isScrolling = false;
+                }, scrollThreshold);
+            }
+        });
+
+        // Re-enable smooth scrolling on the html element for the script
+        document.documentElement.style.scrollBehavior = 'smooth';
+        // The main scroll logic is now handled by the script above
+        document.querySelectorAll('section').forEach(section => {
+             section.style.scrollSnapAlign = 'start';
+        });
+
+    });
+  </script>
+
+</body>
+</html>
+
